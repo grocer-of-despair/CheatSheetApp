@@ -113,7 +113,7 @@ class Links(Base):
 
 # INSERT AT END OF FILE ###
 engine = create_engine(
-            'postgresql+psycopg2://grader:grader@localhost:5432/cheatsheet')
+            'postgresql://grader:grader@localhost/cheatsheet')
 Base.metadata.create_all(engine)
 Base.metadata.bind = engine
 DBSession = sessionmaker(bind=engine)

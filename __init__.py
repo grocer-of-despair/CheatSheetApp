@@ -23,12 +23,12 @@ app = Flask(__name__)
 redis = Redis()
 
 CLIENT_ID = json.loads(
-    open('client_secrets.json', 'r').read())['web']['client_id']
+    open('/var/www/cheatsheet/CheatSheetApp/client_secrets.json', 'r').read())['web']['client_id']
 APPLICATION_NAME = "Code Cheat Sheet App"
 
 # Connect to Database and create database session
 engine = create_engine(
-            'postgresql+psycopg2://grader:grader@localhost:5432/cheatsheet')
+            'postgresql://grader:grader@localhost/cheatsheet')
 Base.metadata.bind = engine
 DBSession = sessionmaker(bind=engine)
 session = DBSession()
@@ -761,4 +761,4 @@ def getConceptInfo(concept_id, category_id):
 if __name__ == '__main__':
     app.secret_key = 'super_secret_key'
     app.debug = True
-    app.run(host='0.0.0.0', port=5000)
+    app.run(host='52.51.36.36', port=80)
