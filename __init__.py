@@ -22,8 +22,12 @@ from redis import Redis
 app = Flask(__name__)
 redis = Redis()
 
+THIS_FOLDER = os.path.dirname(os.path.abspath(__file__))
+fkey = os.path.join(THIS_FOLDER, 'fb_clients_secrets.json')
+gkey = os.path.join(THIS_FOLDER, 'client_secrets.json')
+
 CLIENT_ID = json.loads(
-    open('/var/www/cheatsheet/CheatSheetApp/client_secrets.json', 'r').read())['web']['client_id']
+    open(gkey, 'r').read())['web']['client_id']
 APPLICATION_NAME = "Code Cheat Sheet App"
 
 # Connect to Database and create database session
@@ -147,13 +151,10 @@ def fbconnect():
     access_token = request.data
     logger.debug("access token received %s ", access_token)
 
-    app_id = json.loads(open('/var/www/cheatsheet/CheatSheetApp/fb_client_secrets.json', 'r').read())[
+    app_id = json.loads(open(fkey, 'r').read())[
         'web']['app_id']
-    app_secret = json.loads(
-        open('/var/www/cheatsheet/CheatSheetApp/fb_client_secrets.json', 'r').read())['web']['app_secret']
-    url = 'https://graph.facebook.com/oauth/access_token?grant_type=fb_exchange_token\
-            &client_id=%s&client_secret=%s&fb_exchange_token=%s' % (
-            app_id, app_secret, access_token)
+    app_secret = json.loads(open(fkey, 'r').read())['web']['app_secret']
+    url = 'https://graph.facebook.com/oauth/access_token?grant_type=fb_exchange_token&client_id=%s&client_secret=%s&fb_exchange_token=%s' % (app_id, app_secret, access_token)
     h = httplib2.Http()
     result = h.request(url, 'GET')[1]
 
@@ -169,8 +170,7 @@ def fbconnect():
     '''
     token = result.split(',')[0].split(':')[1].replace('"', '')
 
-    url = 'https://graph.facebook.com/v2.8/me?access_token=%s\
-            &fields=name,id,email' % token
+    url = 'https://graph.facebook.com/v2.8/me?access_token=%s&fields=name,id,email' % token
     h = httplib2.Http()
     result = h.request(url, 'GET')[1]
     logger.debug("url sent for API access:%s", url)
@@ -185,8 +185,7 @@ def fbconnect():
     login_session['access_token'] = token
 
     # Get user picture
-    url = 'https://graph.facebook.com/v2.8/me/picture?access_token=%s\
-            &redirect=0&height=200&width=200' % token
+    url = 'https://graph.facebook.com/v2.8/me/picture?access_token=%s&redirect=0&height=200&width=200' % token
     h = httplib2.Http()
     result = h.request(url, 'GET')[1]
     data = json.loads(result)
@@ -224,8 +223,7 @@ def fbdisconnect():
     facebook_id = login_session['facebook_id']
     # The access token must me included to successfully logout
     access_token = login_session['access_token']
-    url = 'https://graph.facebook.com/%s/permissions?access_token=%s' % (
-            facebook_id, access_token)
+    url = 'https://graph.facebook.com/%s/permissions?access_token=%s' % (facebook_id, access_token)
     h = httplib2.Http()
     result = h.request(url, 'DELETE')[1]
     return "You have been logged out!"
@@ -247,7 +245,7 @@ def gconnect():
 
     try:
         # Upgrade the authorization code into a credentials object
-        oauth_flow = flow_from_clientsecrets('/var/www/cheatsheet/CheatSheetApp/client_secrets.json', scope='')
+        oauth_flow = flow_from_clientsecrets(gkey, scope='')
         oauth_flow.redirect_uri = 'postmessage'
         credentials = oauth_flow.step2_exchange(code)
     except FlowExchangeError:
@@ -258,8 +256,7 @@ def gconnect():
 
     # Check that the access token is valid.
     access_token = credentials.access_token
-    url = ('https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=%s'
-           % access_token)
+    url = ('https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=%s'% access_token)
     h = httplib2.Http()
     result = json.loads(h.request(url, 'GET')[1])
     # If there was an error in the access token info, abort.
