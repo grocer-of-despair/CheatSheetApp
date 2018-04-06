@@ -54,7 +54,7 @@
           },
           contentType: 'application/octet-stream; charset=utf-8',
           error: function(xhr, textStatus, errorThrown){
-     		   alert(errorThrown);
+     		   alert(xhr + errorThrown + errorThrown);
 	    },
 	  success: function(result) {
             // Handle or verify the server response.
@@ -73,7 +73,7 @@
           data: authResult['code']
         });
       } else {
-        console.log(" There was an error.")
+         console.log("there was an error");
       }
     }
     </script>

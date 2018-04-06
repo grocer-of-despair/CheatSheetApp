@@ -16,14 +16,18 @@ import requests
 import time
 import logging
 import psycopg2
+import google.oauth2.credentials
+import google_auth_oauthlib.flow
 from oauth2client.client import flow_from_clientsecrets, FlowExchangeError
+import google.oauth2.credentials
+import google_auth_oauthlib.flow
 from redis import Redis
 
 app = Flask(__name__)
 redis = Redis()
 
 THIS_FOLDER = os.path.dirname(os.path.abspath(__file__))
-fkey = os.path.join(THIS_FOLDER, 'fb_clients_secrets.json')
+fkey = os.path.join(THIS_FOLDER, 'fb_client_secrets.json')
 gkey = os.path.join(THIS_FOLDER, 'client_secrets.json')
 
 CLIENT_ID = json.loads(
@@ -32,7 +36,7 @@ APPLICATION_NAME = "Code Cheat Sheet App"
 
 # Connect to Database and create database session
 engine = create_engine(
-            'postgresql://grader:grader@localhost:5432/cheatsheet')
+            'postgresql://grader:grader@localhost/cheatsheet')
 Base.metadata.bind = engine
 DBSession = sessionmaker(bind=engine)
 session = DBSession()
@@ -247,7 +251,7 @@ def gconnect():
         # Upgrade the authorization code into a credentials object
         oauth_flow = flow_from_clientsecrets(gkey, scope='')
         oauth_flow.redirect_uri = 'postmessage'
-        credentials = oauth_flow.step2_exchange(code)
+	credentials = oauth_flow.step2_exchange(code)
     except FlowExchangeError:
         response = make_response(
             json.dumps('Failed to upgrade the authorization code.'), 401)
@@ -355,13 +359,14 @@ def getUserInfo(user_id):
 
 # Get User ID from Database
 def getUserID(email):
+    
     """
         This function gets a users ID from the database using an email address
     """
     try:
         user = session.query(User).filter_by(email=email).one_or_none()
         return user.id
-    except(ValueError):
+    except:
         return None
 
 

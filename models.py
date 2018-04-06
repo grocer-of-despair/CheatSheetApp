@@ -12,7 +12,7 @@ Base = declarative_base()
 
 # ADD YOUR USER MODEL HERE
 class User(Base):
-    __tablename__ = 'public.user'
+    __tablename__ = 'user'
     id = Column(Integer, primary_key=True)
     name = Column(String(32), index=True)
     picture = Column(String)
@@ -52,7 +52,7 @@ class Category(Base):
 
     id = Column(Integer, primary_key=True)
     name = Column(String(250), nullable=False)
-    user_id = Column(Integer, ForeignKey('public.user.id'))
+    user_id = Column(Integer, ForeignKey('user.id'))
     picture = Column(String)
     user = relationship(User)
 
@@ -75,7 +75,7 @@ class Concept(Base):
     picture = Column(String)
     category_id = Column(Integer, ForeignKey('category.id'))
     category = relationship(Category)
-    user_id = Column(Integer, ForeignKey('public.user.id'))
+    user_id = Column(Integer, ForeignKey('user.id'))
     user = relationship(User)
 
     @property
@@ -98,7 +98,7 @@ class Links(Base):
     link = Column(String)
     category_id = Column(Integer, ForeignKey('category.id'))
     category = relationship(Category)
-    user_id = Column(Integer, ForeignKey('public.user.id'))
+    user_id = Column(Integer, ForeignKey('user.id'))
     user = relationship(User)
 
     @property
@@ -113,8 +113,5 @@ class Links(Base):
 
 # INSERT AT END OF FILE ###
 engine = create_engine(
-            'postgresql://grader:grader@localhost:5432/cheatsheet')
+            'postgresql://grader:grader@localhost/cheatsheet')
 Base.metadata.create_all(engine)
-Base.metadata.bind = engine
-DBSession = sessionmaker(bind=engine)
-session = DBSession()
